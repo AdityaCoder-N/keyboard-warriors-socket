@@ -1,9 +1,16 @@
 import { rooms, roomStates } from '../config/socket.js';
+import { paragraphs } from '../utils/paragraphs.js'
 
 export const joinRoom = (io, socket, { roomId, username }) => {
     if (!rooms[roomId]) {
         rooms[roomId] = [];
-        roomStates[roomId] = { gameInProgress: false };
+
+        // getting paragraph for room
+        const randomIndex = Math.floor(Math.random() * paragraphs.length);
+        const selectedParagraph = paragraphs[randomIndex];
+
+        roomStates[roomId] = { gameInProgress: false, paragraphIndex:randomIndex, selectedParagraph };
+
     }
     
     // Checking if a user with the same socket ID already exists in the room
@@ -29,9 +36,10 @@ export const joinRoom = (io, socket, { roomId, username }) => {
 
     rooms[roomId].push({ id: socket.id, username:uniqueUsername, isReady: false, isDisconnected:false });
     socket.join(roomId);
-    
 
     io.to(roomId).emit('roomUsers', rooms[roomId]);
+    socket.emit('paragraph', roomStates[roomId].selectedParagraph);
+    
     console.log(`${username} joined room: ${socket.id}`);
 }
 
