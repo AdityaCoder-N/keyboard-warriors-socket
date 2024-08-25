@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-
+import {rooms, roomStates} from '../config/socket.js'
 router.get('/verify-room/:roomId', (req, res) => {
   const { roomId } = req.params;
   if (rooms[roomId]) {
