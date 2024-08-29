@@ -17,7 +17,9 @@ export const joinRoom = (io, socket, { roomId, username }) => {
     const existingSocketUser = rooms[roomId].find(user => user.id === socket.id);
 
     if (existingSocketUser) {
-        // If the user is already in the room with the same socket ID, don't add them again
+        // If the user is already in the room with the same socket ID, don't add them again 
+        const userIndex = rooms[roomId].findIndex(user => user.id === socket.id);
+        rooms[roomId][userIndex].isDisconnected=false;
         console.log(`User with socket ID ${socket.id} is already in the room: ${roomId}`);
         return;
     }
@@ -59,12 +61,12 @@ export const toggleReady = (io, socket, { roomId, isReady }) => {
     }
 };
 
-export const bombPlayers = (io, socket, { roomId }) => {
-    socket.to(roomId).emit('bombPlayers');
+export const bombPlayers = (io, socket, { roomId,username }) => {
+    socket.to(roomId).emit('bombPlayers',{username});
 };
 
-export const stopPlayers = (io, socket, { roomId }) => {
-    socket.to(roomId).emit('stopPlayers');
+export const stopPlayers = (io, socket, { roomId,username }) => {
+    socket.to(roomId).emit('stopPlayers',{username});
 };
 
 export const gameWon = (io, socket, { roomId, username }) => {
@@ -78,7 +80,11 @@ export const gameWon = (io, socket, { roomId, username }) => {
         io.to(roomId).emit('roomUsers', rooms[roomId]);
   
         // Emitting to the room that the game has been won by the user
-        io.to(roomId).emit('gameWon', { winner: username });
+        io.to(roomId).emit('gameWon', { users:rooms[roomId], winner: username });
+        
+        // starting fresh room with new paragraph.
+        delete rooms[roomId];
+        delete roomStates[roomId];
     }
 };
 
